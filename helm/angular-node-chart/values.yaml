@@ -1,0 +1,8 @@
+replicaCount: 5
+
+image:
+  repository: rakii8585/angular-node-webapp:latest
+  pullPolicy: Always
+
+application:
+  name: angular-webapp
