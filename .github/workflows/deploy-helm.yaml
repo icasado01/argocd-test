@@ -1,0 +1,25 @@
+name: Deploy Helm Chart on WSL Minikube
+
+on:
+  push:
+    branches:
+      - main
+  
+  workflow-dispatch:
+
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # - name: Install Helm
+    #   run: |
+    #     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: Deploy Helm Chart
+      run: |
+        helm upgrade --install test ./helm/test --namespace test --create-namespace
