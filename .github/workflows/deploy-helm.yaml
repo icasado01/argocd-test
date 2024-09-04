@@ -20,6 +20,31 @@ jobs:
     #   run: |
     #     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-    - name: Deploy Helm Chart
+    - name: Deploy Helm Charts
       run: |
-        helm upgrade --install test ./helm/test --namespace test --create-namespace
+        for chart in ./helm/*; do
+          if [ -d "$chart" ]; then
+            chart_name=$(basename "$chart")
+            helm upgrade --install "$chart_name" "$chart" --namespace "$chart_name" --create-namespace
+            
+            # Check if the Helm release was deployed successfully
+            release_status=$(helm status "$chart_name" --namespace "$chart_name" 2>&1)
+
+            if echo "$release_status" | grep -q "STATUS: deployed"; then
+              echo "Chart $chart_name deployed successfully."
+            else
+              echo "Error: Chart $chart_name failed to deploy. Retrying..."
+              # Retry the deployment if it failed
+              helm upgrade --install "$chart_name" "$chart" --namespace "$chart_name" --create-namespace
+              
+              # Check the status again after retrying
+              release_status=$(helm status "$chart_name" --namespace "$chart_name" 2>&1)
+              if echo "$release_status" | grep -q "STATUS: deployed"; then
+                echo "Chart $chart_name deployed successfully after retry."
+              else
+                echo "Error: Chart $chart_name failed to deploy after retry. Exiting."
+                exit 1
+              fi
+            fi
+          fi
+        done
