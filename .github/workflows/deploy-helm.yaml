@@ -20,6 +20,11 @@ jobs:
     #   run: |
     #     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-    - name: Deploy Helm Chart
+    - name: Deploy Helm Charts
       run: |
-        helm upgrade --install test ./helm/test --namespace test --create-namespace
+        for chart in ./helm/*; do
+          if [ -d "$chart" ]; then
+            chart_name=$(basename "$chart")
+            helm upgrade --install "$chart_name" "$chart" --namespace "$chart_name" --create-namespace
+          fi
+        done
